@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Postal Rate Calculator</title>
+      <link rel='stylesheet' href='/stylesheets/style.css' />
+   </head>
+   <body>
+      <h1>Postal Rate Calculator</h1>
+      <form action='/prove09/calc'>
+         <label>Item Weight: <input type=number name=weight required></input></label></br>
+         <label>Type: <select name=type>
+            <option value=stamp>Letter (Stamped)</option>
+            <option value=meter>Letter (Metered)</option>
+            <option value=large>Large Envelope (Flat)</option>
+            <option value=package>First-Class Package Service—Retail</option>
+         </select></label></br>
+         <input type=submit value=Calculate />
+      </form>
+   </body>
+</html>
