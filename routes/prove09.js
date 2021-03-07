@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var debug = require('debug')('cs313-node:server');
+var debug = require('debug')('cs313-node:prove09');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
