@@ -12,14 +12,15 @@ var $table = $('#table');
 
 function responseHandler(res) {
    $.each(res, function (i, row) {
-      console.log("row name: " + row.name);
-      console.log("row lvl: " + row.lvl);
+      //console.log("row name: " + row.name);
+      //console.log("row casting_time: " + row.casting_time);
       row.source = ucwords(row.source);
       row.school = ucwords(row.school);
       row.casting_time_type = ucwords(row.casting_time_type);
       row.duration = ucwords(row.duration);
       //row.save_attack = ucwords(row.save_attack);
       row.lvl = (row.lvl == 0)? 'Cantrip': row.lvl;
+      row.range = ((row.range)? (row.range + ' ') : '') + row.range_type;
    });
    return res;
 }
@@ -31,13 +32,15 @@ function level(value) {
    return value + "th-level ";
 }
 function detailFormatter(index, row) {
+   console.log(row.component_desc);
    var html = '<b>' + row.name + '</b>' + '</br>' + level(row.lvl) + row.school;
    html += (row.ritual)? " (ritual)":'';
    html += (row.concentration)? " <i class='i-cons'></i>":'';
    html += '</br><b>Casting time:</b> ' + row.casting_time + ' ' + row.casting_time_type;
-   html += '</br><b>Range:</b> ' + row.range + ' ' + row.range_type
+   html += '</br><b>Range:</b> ' + row.range;
    html += '</br><b>Components:</b> ' + row.components;
-   html += row.component_desc && (' (' + row.component_desc + ')' + row.consumed && "(consumed)");
+   if(row.component_desc) html += ' - ' + row.component_desc;
+   if(row.consumed) html += " (consumed)";
    html += '</br><b>Duration:</b> ' + row.duration;
    html += '<p>' + row.description + '</p>';
    if(row.higher_desc) {html += '<p><b>At Higher Levels:</b> ' + row.higher_desc + '</p>';}
@@ -105,13 +108,10 @@ function initTable() {
             align: "center"
          },*/ {
             title: "Range",
-            //field: ["range", "range_type"],
+            field: "range",
             sortable: true,
             visible: false,
-            align: "center",
-            formatter: (value, row) => {
-               return row.range + " " + row.range_type
-            }
+            align: "center"
          }, {
             title: "Area",
             field: "area",
@@ -125,7 +125,7 @@ function initTable() {
             visible: false,
             align: "center",
             formatter: (value, row) => {
-               return value + "</br>" + ((row.consumed)? 'Materials Consumed, ' : '') + row.component_desc
+               return value + ((row.consumed)? ' (Materials Consumed)' : '') + "</br>" + row.component_desc
             }
          }, {
             title: "Description",
