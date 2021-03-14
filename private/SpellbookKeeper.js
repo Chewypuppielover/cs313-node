@@ -48,31 +48,29 @@ router.get('/', function(req, res, next) {
          var data1;
          if (err) throw err;
          else (data1 = JSON.parse(data, true));
-         res.write("</br>Spells: ");
-         for(var spellKey in data1) {
+         //res.write("</br>Spells: ");
+         for(var spellKey in data1) { //for(var spellKey = 0; spellKey < 6; spellKey++) { 
             var spell = data1[spellKey];
-            debug(spell);
-            for(var key in spell) {
-               res.write(key + ": " + spell[key] + "</br>");
-               var s = spell['page'].split(' ')[0];
-               var source_id = (s == 'ee' ? "elemental evil player's companion" : (s == 'phb' ? "player's handbook" : "sword coast adventurer's guide"));
-               var c = spell['casting_time'].toLowerCase().split(' ');
-               var casting_id = c.slice(1).join(' ');
-               //if(end(c) != 'action' && c[strlen(c[0])-1] != 's') casting_id += 's';
-               var lvl = (Number.isInteger(spell['level'][0])? spell['level'][0]:0);
-               var consumed = spell['material']? spell['material'].match('/(gp)/'):'';
-               var r = spell['range'].split(' ');
-               var range_num = (Number.isInteger(r[0]) ? r[0] : 0);
-               res.write('<b>source_id:</b> ' + source_id + '</br>');
-               res.write('<b>casting_id:</b> ' + casting_id + '</br>');
-               res.write('<b>lvl:</b> ' + lvl + '</br>');
-               res.write('<b>consumed:</b> ' + consumed + '</br>');
-               res.write('<b>range_num:</b> ' + range_num + '</br>');
-               
-               var values = [spell['name'], spell['school'].toLowerCase(), source_id, casting_id, c[0], spell['duration'], lvl, spell['components'], (spell['concentration'] == 'yes' ? true : false), (spell['ritual'] == 'yes' ? true : false), consumed, range_num, r[r.length-1], (spell['material']? spell['material'] :''), spell['desc'], (spell['higher_level']? spell['higher_level'] :'')];
-               debug(values);
-               pool.query("INSERT INTO project2.spells (name, school_id, source_id, casting_time_id, casting_time, duration, lvl, concentration, ritual, range, range_type, components, component_desc, consumed, description, higher_desc) VALUES ($1, (SELECT id FROM project2.schools WHERE name=$2), (SELECT id FROM project2.sources WHERE name=$3), (SELECT id FROM project2.lengths WHERE name=$4), $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)", values, (err, res) => {debug("Query json returned: " + err);});
-            }
+            //debug(spell);
+            //for(var key in spell) res.write(key + ": " + spell[key] + "</br>");
+            var s = spell['page'].split(' ')[0];
+            var source_id = (s == 'ee' ? "elemental evil player's companion" : (s == 'phb' ? "player's handbook" : "sword coast adventurer's guide"));
+            var c = spell['casting_time'].toLowerCase().split(' ');
+            var casting_id = c.slice(1).join(' ');
+            if(c[c.length-1] != 'action' && c[c.length-1][this.length-1] != 's') casting_id += 's';
+            var lvl = (spell['level'][0].match(/\d/)? spell['level'][0]:0);
+            var consumed = spell['material']? spell['material'].match('/(gp)/'):false;
+            var r = spell['range'].split(' ');
+            var range_num = (Number.isInteger(r[0]) ? r[0] : 0);
+            // res.write('<b>source_id:</b> ' + source_id + '</br>');
+            // res.write('<b>casting_id:</b> ' + casting_id + '</br>');
+            // res.write('<b>lvl:</b> ' + lvl + '</br>');
+            // res.write('<b>consumed:</b> ' + consumed + '</br>');
+            // res.write('<b>range_num:</b> ' + range_num + '</br>');
+            
+            var values = [spell['name'], spell['school'].toLowerCase(), source_id, casting_id, c[0], spell['duration'], lvl, (spell['concentration'] == 'yes' ? true : false), (spell['ritual'] == 'yes' ? true : false), range_num, r[r.length-1], spell['components'], (spell['material']? spell['material'] :''), Boolean(consumed), spell['desc'], (spell['higher_level']? spell['higher_level'] :'')];
+            debug(lvl, spell['level'][0].match(/\d/));
+            pool.query("INSERT INTO project2.spells (name, school_id, source_id, casting_time_id, casting_time, duration, lvl, concentration, ritual, range, range_type, components, component_desc, consumed, description, higher_desc) VALUES ($1, (SELECT id FROM project2.schools WHERE name=$2), (SELECT id FROM project2.sources WHERE name=$3), (SELECT id FROM project2.lengths WHERE name=$4), $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)", values, (err, res) => {debug(res + "Query json returned: " + err);});
          }
       });
       /* $json = file_get_contents('spellData.json');

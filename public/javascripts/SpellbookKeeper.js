@@ -12,6 +12,8 @@ var $table = $('#table');
 
 function responseHandler(res) {
    $.each(res, function (i, row) {
+      console.log("row name: " + row.name);
+      console.log("row lvl: " + row.lvl);
       row.source = ucwords(row.source);
       row.school = ucwords(row.school);
       row.casting_time_type = ucwords(row.casting_time_type);
