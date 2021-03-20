@@ -12,7 +12,7 @@ var $table = $('#table');
 
 function responseHandler(res) {
    console.log(res);
-   $.each(res, function (i, row) {
+   $.each(res.rows, function (i, row) {
       //console.log("row name: " + row.name);
       //console.log("row casting_time: " + row.casting_time);
       row.source = ucwords(row.source);
