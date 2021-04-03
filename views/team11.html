@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang=en>
+   <head>
+      <meta charset = "utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Movie Search</title>
+      <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"> </script> -->
+      <script>
+         function ajax() {
+            var str = document.querySelector('#search').value;
+            console.log(str);
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+               if (this.readyState == 4 && this.status == 200) {
+                  console.log(this.responseText);
+                  ret = JSON.parse(this.responseText).Search;
+                  text = "";
+                  for(key in ret) {
+                     console.log(key, ret[key]);
+                     text += "<button onclick='det(\""+ret[key].imdbID+"\")'>Details</button>" + ret[key].Title + "<br/>";
+                  }
+                  document.querySelector("div").innerHTML = text;
+               }
+            };
+            xhttp.open("GET", "http://www.omdbapi.com/?apikey=92c60559&s=" + str, true);
+            xhttp.send();
+         }
+         
+         function det(str) {
+            console.log(str);
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+               if (this.readyState == 4 && this.status == 200) {
+                  console.log(this.responseText);
+                  ret = JSON.parse(this.responseText);
+                  text = '';
+                  for(key in ret) {
+                     if(key == 'Poster') text += "<img src='" + ret[key] + "'><br/>";
+                     else text += key + ': ' + JSON.stringify(ret[key]) + "<br/>";
+                  }
+                  document.querySelector("div").innerHTML = text;
+               }
+            };
+            xhttp.open("GET", "http://www.omdbapi.com/?apikey=92c60559&i=" + str, true);
+            xhttp.send();
+         }
+      </script>
+   </head>
+   <body>
+      <label>Movie: <input type=text id=search></label>
+      <button onclick='ajax()'>Search</button>
+      <div></div>
+   </body>
+</html>
