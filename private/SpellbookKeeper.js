@@ -2,43 +2,132 @@ var express = require('express');
 var router = express.Router();
 var debug = require('debug')('SK:DBControll');
 const { Pool } = require("pg"); // This is the postgres database connection module.
-const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({connectionString: connectionString});
+const pool = new Pool({connectionString: process.env.DATABASE_URL, ssl:{rejectUnauthorized: false}});
+
+var users = "CREATE TABLE project2.users (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "username VARCHAR(100) NOT NULL UNIQUE, " +
+   "password VARCHAR(100) NOT NULL, " +
+   "name VARCHAR(100) NOT NULL)";
+   
+var spellBooks = "CREATE TABLE project2.books (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "name VARCHAR(100) NOT NULL, " +
+   "user_id INT NOT NULL REFERENCES project2.users(id))";
+   
+var sources = "CREATE TABLE project2.sources (" +
+   "id SERIAL NOT NULL PRIMARY KEY, " +
+   "name VARCHAR(100) NOT NULL UNIQUE)";
+   
+var schools = "CREATE TABLE project2.schools (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "name VARCHAR(100) NOT NULL UNIQUE)";
+   
+var classes = "CREATE TABLE project2.classes (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "name VARCHAR(100) NOT NULL UNIQUE)";
+   
+var lengths = "CREATE TABLE project2.lengths (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "name VARCHAR(100) NOT NULL UNIQUE)";
+   
+var saves = "CREATE TABLE project2.saves_attacks (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "name VARCHAR(100) NOT NULL UNIQUE)";
+
+var spells = "CREATE TABLE project2.spells (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "name VARCHAR(100) NOT NULL UNIQUE, " +
+   "school_id INT NOT NULL REFERENCES project2.schools(id), " +
+   "source_id INT NOT NULL REFERENCES project2.sources(id), " +
+   "casting_time_id INT NOT NULL REFERENCES project2.lengths(id), " +
+   "save_id INT REFERENCES project2.saves_attacks(id), " +
+   "casting_time INT NOT NULL, " +
+   "duration VARCHAR(100) NOT NULL, " +
+   "lvl SMALLINT NOT NULL, " +
+   "concentration BOOLEAN NOT NULL, " +
+   "ritual BOOLEAN NOT NULL, " +
+   "range INT, " +
+   "range_type VARCHAR(30), " +
+   "area VARCHAR(100), " +
+   "components VARCHAR(7) NOT NULL, " +
+   "component_desc VARCHAR(200), " +
+   "consumed BOOLEAN NOT NULL, " +
+   "description TEXT NOT NULL, " +
+   "higher_desc TEXT)";
+   
+var spells_by_class = "CREATE TABLE project2.spells_by_class (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "class_id INT NOT NULL REFERENCES project2.classes(id), " +
+   "spell_id INT NOT NULL REFERENCES project2.spells(id))";
+
+var spellBook = "CREATE TABLE project2.spellbook_relation (" +
+   "id SERIAL NOT NULL UNIQUE PRIMARY KEY, " +
+   "book_id INT NOT NULL REFERENCES project2.books(id), " +
+   "spell_id INT NOT NULL REFERENCES project2.spells(id))";
+
+/*
+if (req.query.submit == 'create') {
+      pool.query(users, (err, res) => {
+         debug("Query users returned: " + err);
+         pool.query(spellBooks, (err, res) => {
+            debug("Query spellBooks returned: " + err);
+            pool.query(sources, (err, res) => {
+               debug("Query sources returned: " + err);
+               pool.query(schools, (err, res) => {
+                  debug("Query schools returned: " + err);
+                  pool.query(classes, (err, res) => {
+                     debug("Query classes returned: " + err);
+                     pool.query(lengths, (err, res) => {
+                        debug("Query lengths returned: " + err);
+                        pool.query(saves, (err, res) => {
+                           debug("Query saves returned: " + err);
+                           pool.query(spells, (err, res) => {
+                              debug("Query spells returned: " + err);
+                              pool.query(spells_by_class, (err, res) => {
+                                 debug("Query spells_by_class returned: " + err);
+                                 pool.query(spellBook, (err, res) => {debug("Query spellbook returned: " + err);});
+      });});});});});});});});});
+   }
+*/
+
 
 router.get('/', function(req, res, next) {
    if (req.query.submit == 'delete'){
       pool.query("DROP TABLE IF EXISTS project2.spellbook_relation, project2.spells_by_class, project2.spells, project2.saves_attacks, project2.lengths, project2.classes, project2.schools, project2.sources, project2.books, project2.users", (err, res) => {debug("Query delete returned: " + err);});
    }
+   
    if (req.query.submit == 'create') {
-      pool.query("CREATE TABLE project2.users (id SERIAL NOT NULL UNIQUE PRIMARY KEY, username VARCHAR(100) NOT NULL UNIQUE, password VARCHAR(100) NOT NULL, name VARCHAR(100) NOT NULL)", (err, res) => 
-      {debug("Query users returned: " + err);
-         pool.query("CREATE TABLE project2.books (id SERIAL NOT NULL UNIQUE PRIMARY KEY, name VARCHAR(100) NOT NULL, user_id INT NOT NULL REFERENCES project2.users(id))", (err, res) =>
-         {debug("Query books returned: " + err);
-            pool.query("CREATE TABLE project2.sources (id SERIAL NOT NULL PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE)", (err, res) => 
-            {debug("Query sources returned: " + err);
-               pool.query("CREATE TABLE project2.schools (id SERIAL NOT NULL UNIQUE PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE)", (err, res) => 
-               {debug("Query schools returned: " + err);
-                  pool.query("CREATE TABLE project2.classes (id SERIAL NOT NULL UNIQUE PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE)", (err, res) => 
-                  {debug("Query classes returned: " + err);
-                     pool.query("CREATE TABLE project2.lengths (id SERIAL NOT NULL UNIQUE PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE)", (err, res) =>
-                     {debug("Query lengths returned: " + err);
-                        pool.query("CREATE TABLE project2.saves_attacks (id SERIAL NOT NULL UNIQUE PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE)", (err, res) =>
-                        {debug("Query saves returned: " + err);
-                           pool.query("CREATE TABLE project2.spells (id SERIAL NOT NULL UNIQUE PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE, school_id INT NOT NULL REFERENCES project2.schools(id), source_id INT NOT NULL REFERENCES project2.sources(id), casting_time_id INT NOT NULL REFERENCES project2.lengths(id), save_id INT REFERENCES project2.saves_attacks(id), casting_time INT NOT NULL, duration VARCHAR(100) NOT NULL, lvl SMALLINT NOT NULL, concentration BOOLEAN NOT NULL, ritual BOOLEAN NOT NULL, range INT, range_type VARCHAR(30), area VARCHAR(100), components VARCHAR(7) NOT NULL, component_desc VARCHAR(200), consumed BOOLEAN NOT NULL, description TEXT NOT NULL, higher_desc TEXT)", (err, res) => 
-                           {debug("Query spells returned: " + err);
-                              pool.query("CREATE TABLE project2.spells_by_class (id SERIAL NOT NULL UNIQUE PRIMARY KEY, class_id INT NOT NULL REFERENCES project2.classes(id), spell_id INT NOT NULL REFERENCES project2.spells(id))", (err, res) => 
-                              {debug("Query spells_by_class returned: " + err);
-                                 pool.query("CREATE TABLE project2.spellbook_relation (id SERIAL NOT NULL UNIQUE PRIMARY KEY, book_id INT NOT NULL REFERENCES project2.books(id), spell_id INT NOT NULL REFERENCES project2.spells(id))", (err, res) => {debug("Query spellbook returned: " + err);});
-      });});});});});});});});});
+      var count = 0;
+      var create1 = function() { count++; if(count == 6) doCreate2(); };
+      //create1
+      pool.query(users, (err, res) => {
+         debug("Query users returned: " + err);
+         pool.query(spellBooks, (err, res) => { debug("Query spellBooks returned: " + err); create1(); });
+      });
+      pool.query(sources, (err, res) => { debug("Query sources returned: " + err); create1(); });
+      pool.query(schools, (err, res) => { debug("Query schools returned: " + err); create1(); });
+      pool.query(classes, (err, res) => { debug("Query classes returned: " + err); create1(); });
+      pool.query(lengths, (err, res) => { debug("Query lengths returned: " + err); create1(); });
+      pool.query(saves, (err, res) => { debug("Query saves returned: " + err); create1(); });
+      function create2() { //create2
+         pool.query(spells, (err, res) => { 
+            debug("Query spells returned: " + err);
+            //create3
+            pool.query(spells_by_class, (err, res) => { debug("Query spells_by_class returned: " + err); });
+            pool.query(spellBook, (err, res) => {debug("Query spellbook returned: " + err);});
+         });
+      }
    }
+   
    if (req.query.submit == 'insert') {
       debug("arrived at insert");
       pool.query("INSERT INTO project2.schools (name) VALUES ('conjuration'), ('necromancy'), ('evocation'), ('abjuration'), ('transmutation'), ('divination'), ('enchantment'), ('illusion')", (err, res) => {debug("Query schools returned: " + err);});
    
-      books = ["player's handbook", "elemental evil player's companion", "xanathar's guide to everything", "sword coast adventurer's guide", "explorer's guide to wildemount", "guildmaster's guide to ravnica"];
-      pool.query("INSERT INTO project2.sources (name) VALUES ($1), ($2), ($3), ($4), ('acquisitions incorporated'), ($5), ($6), ('lost laboratory of kwalish'), ('unearthed arcana'), ('custom')", books, (err, res) => {debug("Query sources returned: " + err);});
+      books_in = ["player's handbook", "elemental evil player's companion", "xanathar's guide to everything", "sword coast adventurer's guide", "explorer's guide to wildemount", "guildmaster's guide to ravnica"];
+      pool.query("INSERT INTO project2.sources (name) VALUES ($1), ($2), ($3), ($4), ('acquisitions incorporated'), ($5), ($6), ('lost laboratory of kwalish'), ('unearthed arcana'), ('custom')", books_in, (err, res) => {debug("Query sources returned: " + err);});
          
-      pool.query("INSERT INTO project2.classes (name) VALUES ('artificer'), ('barbarian'), ('bard'), ('cleric'), ('druid'), ('fighter'), ('monk'), ('paladin'), ('ranger'), ('rouge'), ('sourcerer'), ('warlock'), ('wizard'), ('blood hunter')", (err, res) => {debug("Query returned: " + err);});
+      pool.query("INSERT INTO project2.classes (name) VALUES ('artificer'), ('barbarian'), ('bard'), ('cleric'), ('druid'), ('fighter'), ('monk'), ('paladin'), ('ranger'), ('rouge'), ('sorcerer'), ('warlock'), ('wizard'), ('blood hunter')", (err, res) => {debug("Query returned: " + err);});
       pool.query("INSERT INTO project2.lengths (name) VALUES ('action'), ('bonus action'), ('reaction'), ('rounds'), ('years'), ('days'), ('hours'), ('minutes'), ('seconds'), ('instantaneous')", (err, res) => {debug("Query classes returned: " + err);});
       pool.query("INSERT INTO project2.saves_attacks (name) VALUES ('dex save'), ('str save'), ('con save'), ('int save'), ('wis save'), ('char save'), ('melee'), ('ranged')", (err, res) => {debug("Query saves returned: " + err);});
    }
