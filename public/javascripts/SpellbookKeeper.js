@@ -17,11 +17,11 @@ function responseHandler(res) {
       //console.log("row casting_time: " + row.casting_time);
       row.source = ucwords(row.source);
       row.school = ucwords(row.school);
-      row.casting_time_type = ucwords(row.casting_time_type);
+      row.casting_time_type = row.casting_time +' '+ ucwords(row.casting_time_type);
       row.duration = ucwords(row.duration);
       //row.save_attack = ucwords(row.save_attack);
       row.lvl = (row.lvl == 0)? 'Cantrip': row.lvl;
-      row.range = ((row.range)? (row.range + ' ') : '') + row.range_type;
+      row.range_type = ((row.range)? (row.range + ' ') : '') + row.range_type;
    });
    return res;
 }
@@ -33,12 +33,12 @@ function level(value) {
    return value + "th-level ";
 }
 function detailFormatter(index, row) {
-   console.log(row.component_desc);
+   //console.log(row.component_desc);
    var html = '<b>' + row.name + '</b>' + '</br>' + level(row.lvl) + row.school;
    html += (row.ritual)? " (ritual)":'';
    html += (row.concentration)? " <i class='i-cons'></i>":'';
-   html += '</br><b>Casting time:</b> ' + row.casting_time + ' ' + row.casting_time_type;
-   html += '</br><b>Range:</b> ' + row.range;
+   html += '</br><b>Casting time:</b> ' + row.casting_time_type;
+   html += '</br><b>Range:</b> ' + row.range_type;
    html += '</br><b>Components:</b> ' + row.components;
    if(row.component_desc) html += ' - ' + row.component_desc;
    if(row.consumed) html += " (consumed)";
@@ -78,12 +78,9 @@ function initTable() {
             }
          }, {
             title: "Casting Time",
-            //field: ["casting_time", "casting_time_type"],
+            field: "casting_time_type",
             sortable: true,
-            align: "center",
-            formatter: (value, row) => {
-               return row.casting_time + ' ' + row.casting_time_type
-            }
+            align: "center"
          }, {
             title: "Source",
             field: "source",
@@ -109,7 +106,7 @@ function initTable() {
             align: "center"
          },*/ {
             title: "Range",
-            field: "range",
+            field: "range_type",
             sortable: true,
             visible: false,
             align: "center"
