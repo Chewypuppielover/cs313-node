@@ -1,0 +1,90 @@
+<%# schools, saves, lengths, sources, classes %>
+<%#
+   console.log("schools: ");
+   console.log(schools);
+   console.log("saves: ");
+   console.log(saves);
+   console.log("lengths: ");
+   console.log(lengths);
+   console.log("sources: ");
+   console.log(sources);
+   console.log("classes: ");
+   console.log(classes);
+%><%
+   ucwords = function(str) {
+      if(str) {
+         const words = str.split(" ");
+         for (let i = 0; i < words.length; i++) { words[i] = words[i][0].toUpperCase() + words[i].substr(1); }
+         return words.join(" ");
+      }
+   }
+%>
+<form method='POST' action='/sk/newSpell'>
+   <fieldset>
+      <h2>Create New Spell</h2>
+      <label>Spell Name: <input type='text' name='name' required></input></label></br>
+      
+      <label>Level: <select name='level'>
+         <option value='0'>Cantrip</option>
+         <% for(var x = 1; x <= 10; x++) { %>
+            <option value='<%=x%>'>Level <%=x%></option>
+         <% } %>
+      </select></label>
+      <label>School: <select name='school'>
+         <% schools.forEach( (row) => { %>
+            <option value="<%=row.id%>"><%= ucwords(row.name) %></option>
+         <% }) %>
+      </select></label></br>
+      <label>Save or Attack: <select name='save'>
+         <option value=''>-</option>
+         <% saves.forEach( (row) => { %>
+            <option value="<%=row.id%>"><%= ucwords(row.name) %></option>
+         <% }) %>
+      </select></label>
+   </fieldset>
+   <fieldset> 
+      <label>Casting Time: <input type='number' name='casting_time' required></input></label>
+      <label>Action: <select name='cast_id'>
+         <% lengths.forEach( (row) => { %>
+            <option value="<%=row.id%>"><%= ucwords(row.name) %></option>
+         <% }) %>
+      </select></label></br>
+      
+      <label>Range: <input type='number' name='range'></input></label>
+      <label><input type='text' name='range_type'></input></label></br>
+      
+      <label>Duration: <input type='text' name='duration' required></input></label>
+      
+      <label>Area: <input type='text' name='area'></input></label></br>
+   </fieldset>
+   <fieldset> 
+      Components: 
+      <label><input type='checkbox' name='components[]' value='V'/> Verbal</label>
+      <label><input type='checkbox' name='components[]' value='S'/> Semantic</label>
+      <label><input type='checkbox' name='components[]' value='M'/> Material</label></br>
+      <label><input type='checkbox' name='consumed'/> Materials Consumed?</label>
+      <label>Components Description: <input type='text' name='com_desc'/></label></br>
+      <label><input type='checkbox' name='con'/> Concentration</label>
+      <label><input type='checkbox' name='ritual'/> Ritual</label></br>
+   </fieldset>
+   <fieldset> 
+      <label>Spell Description: </br>
+      <textarea name='description' required></textarea></label></br>
+      <label>Spell Description at Higher Levels: </br>
+      <textarea name='higher_desc'></textarea></label></br>
+   </fieldset>
+   <fieldset> 
+      <label>Book: <select name='source'>
+         <% sources.forEach( (row) => { %>
+            <option value="<%=row.id%>"><%= ucwords(row.name) %></option>
+         <% }) %>
+      </select></label></br>
+      
+      Classes: </br>
+      <% classes.forEach( (row) => { %>
+         <label><input type='checkbox' name='classes[]' value='<%=row.id%>'> <%= ucwords(row.name) %></label>
+         <% if(row.id%4) {%> <pre style='display:inline'>&#09;</pre> <%} else {%></br><%}%>
+      <% }) %>
+   </fieldset>
+      <input type='submit' value='Create Spell'/>
+</form>

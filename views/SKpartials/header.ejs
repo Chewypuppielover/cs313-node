@@ -1,7 +1,38 @@
+<%# account %>
+<%
+   var print;
+   if(locals.account) {
+      console.log(account);
+      print = account.name;
+   } else print = 'Sign In';
+%>
+<style>
+.dropdown-toggle::after {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: .255em;
+    vertical-align: .255em;
+    content: "test";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}
+</style>
+
 <h1>Spellbook Keeper</h1>
 <div class='nav'>
    <button id='spells' class='nav-link' disabled onclick="a('#Spells')">Spells</button>
-   </br><button id='spellbooks' class='nav-link' onclick="a('#Spellbooks')">My Spellbooks</button>
-   </br><button id='manage' class='nav-link' onclick="a('#Manage')">Manage</button>
-</div>
+   <button id='spellbooks' class='nav-link' onclick="a('#Spellbooks')">My Spellbooks</button>
+   <button id='manage' class='nav-link' onclick="a('#Manage')">Manage</button>
+   
+   <div id='account' class='dropdown'>
+      <button class='btn btn-primary dropdown-toggle' data-toggle="dropdown"><%=print%><span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="#">HTML</a></li>
+        <li><a href="#">CSS</a></li>
+        <li><a href="#">JavaScript</a></li>
+      </ul>
+   </div>
 <hr/>
