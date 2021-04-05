@@ -77,8 +77,8 @@ router.get('/updateTotal', (req, res, next) => {total++;});
 router.get('/data', (req, res, next) => {
    debugData("data called");
    var q = "SELECT spells.name, spells.lvl, sc.name school, so.name source, s.name save_attack, ct.name casting_time_type, spells.casting_time, spells.duration, spells.concentration, spells.ritual, spells.range, spells.range_type, spells.area, spells.components, spells.component_desc, spells.consumed, spells.description, spells.higher_desc FROM project2.spells spells LEFT JOIN project2.schools sc ON spells.school_id = sc.id LEFT JOIN project2.sources so ON spells.source_id = so.id LEFT JOIN project2.lengths ct ON spells.casting_time_id = ct.id LEFT OUTER JOIN project2.saves_attacks s ON spells.save_id = s.id WHERE (spells.user_id = 1";
-   //if(req.cookie.user) q += " OR spells.user_id = " + req.cookie.user_id + ')'; else 
-   q += ' OR spells.user_id = 2)';
+   if(req.cookies.account) q += " OR spells.user_id = " + req.cookies.account.id + ')'; else q+=')';
+   //q += ' OR spells.user_id = 2)';
    if(req.query.search) q += " AND spells.name ILIKE '%"+req.query.search+"%'";
    q += " ORDER BY " 
    if(req.query.sort) q += req.query.sort + " " + req.query.order + ', ';
@@ -140,7 +140,8 @@ router.use('/newSpell', (req, res, next) => {
       req.body['level'], Boolean(req.body['con']), Boolean(req.body['ritual']),
       req.body['range'], req.body['range_type'], comp, req.body['com_desc'],
       Boolean(req.body['consumed']), req.body['description'], req.body['higher_desc'],
-      req.body['area'], 2];
+      req.body['area']];
+   if(req.cookies.account) ins[17] = req.cookies.account.id; else ins[17] = 2;
    //debug(ins);
    if(req.body.save) {
       //debug(insertSave); 
