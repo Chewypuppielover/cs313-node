@@ -1,24 +1,25 @@
 <%# account %>
 <%
    var print;
+   console.log('header.ejs:');
    if(locals.account) {
-      console.log(account);
+      console.log('header.ejs: ' + JSON.stringify(account));
       print = account.name;
-   } else print = 'Sign In';
+   } else print = 'Account';
 %>
 <style>
-.dropdown-toggle::after {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    margin-left: .255em;
-    vertical-align: .255em;
-    content: "test";
-    border-top: .3em solid;
-    border-right: .3em solid transparent;
-    border-bottom: 0;
-    border-left: .3em solid transparent;
-}
+   .dropdown-toggle::after {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      margin-left: .255em;
+      vertical-align: .255em;
+      content: "";
+      border-top: .3em solid;
+      border-right: .3em solid transparent;
+      border-bottom: 0;
+      border-left: .3em solid transparent;
+   }
 </style>
 
 <h1>Spellbook Keeper</h1>
@@ -28,11 +29,56 @@
    <button id='manage' class='nav-link' onclick="a('#Manage')">Manage</button>
    
    <div id='account' class='dropdown'>
-      <button class='btn btn-primary dropdown-toggle' data-toggle="dropdown"><%=print%><span class="caret"></span></button>
-      <ul class="dropdown-menu">
-        <li><a href="#">HTML</a></li>
-        <li><a href="#">CSS</a></li>
-        <li><a href="#">JavaScript</a></li>
-      </ul>
+      <button class='btn-primary dropdown-toggle' data-bs-toggle="dropdown"><span class="caret"><%=print%></span></button>
+      <div class="dropdown-menu">
+         <% if(locals.account) {%>
+         <a class='dropdown-item' href="/sk/signOut">Sign Out</a>
+         <%} else {%>
+         <form id='signin' method=POST action='sk/signIn' class='dropdown-item'>
+            <input type=text name=username placeholder=username required>
+            <input type=password name=pass placeholder=password required>
+            <br><input type=submit value="Sign In" class='float-right'>
+         </form>
+         <div class='dropdown-divider'></div>
+         <form id='signup' method=POST action='sk/signUp' class='dropdown-item'>
+            <input type=text name=name placeholder=name required>
+            <input type=text name=username placeholder=username required>
+            </br><input type=password name=pass placeholder=password required>
+            <input type=password name=pass1 placeholder='retype password' required>
+            </br><input type=submit value="Create Account" class='float-right'>
+         </form>
+         <%}%>
+      </div>
    </div>
 <hr/>
+
+<script>
+   $( "form" ).each(ajax);
+   
+   function ajax() {
+      console.log( $( this ).serialize() );
+      $(this).on( "submit", function( event ) {
+         event.preventDefault();
+         console.log( $( this ).serialize() );
+         
+         $.ajax({
+            url: $(this).prop('action'),
+            data: $(this).serialize(),
+            type: $(this).prop('method')
+         }).done(function(res) {
+            //$( this ).addClass( "done" );
+            if(res) location.reload();
+            else {
+               console.log('error');
+               console.log(document.cookie);
+            }
+         });
+      });
+   }
+   
+   $('#signup input[name=pass1]').keyup(function () {
+    'use strict';
+      if ($('#signup input[name=pass]').val() === $(this).val()) this.setCustomValidity('');
+      else this.setCustomValidity('Passwords must match');
+   });
+</script>

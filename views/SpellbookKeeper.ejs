@@ -3,7 +3,7 @@
    <head><%- include("SKpartials/head", {title:"Spellbook Keeper"}); %></head>
    <body>
       <header>
-         <%- include("SKpartials/header", {account: {name:"Suzy"} } ); %>
+         <%- include("SKpartials/header", {account} ); %>
       </header>
             
       <div id="Spells" class='tab'>
@@ -33,7 +33,8 @@
       </div>
       
       <div id="Manage" class="collapse tab">
-         <%- include("SKpartials/newSpell", {schools, saves, lengths, sources, classes}) %>
+         <% if(account){ %><%- include("SKpartials/newSpell", {schools, saves, lengths, sources, classes}) %>
+         <% } else{ %>Sign In<%}%>
       </div>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script> <!-- bootstrap all js -->
       <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.js"></script>

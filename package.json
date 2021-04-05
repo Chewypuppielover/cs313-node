@@ -3,16 +3,36 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "watch": "nodemon ./bin/www"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
+    "express-session": "^1.17.1",
     "http-errors": "~1.6.3",
-    "morgan": "~1.9.1",
-    "pg": "^8.5.1"
+    "morgan": "^1.9.1",
+    "pg": "^8.5.1",
+    "session-file-store": "^1.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "comments-on-dependencies": {
+    "cookie-parser": "middleware which parses cookies attached to the client request object",
+    "debug": "allows for partioned and different colored comments",
+    "dotenv": "allows to have a .env file to hold environment values",
+    "ejs": "Embedded Javascript Templating is a templating engine",
+    "express": "a minimal and flexible Node.js web application framework that provides a robust set of features to develop web and mobile applications.",
+    "express-session": "parses session cookie, validates it, etc.",
+    "http-errors": "is used for generating errors",
+    "morgan": "is the usual logger middleware for Express",
+    "pg": "DB access",
+    "session-file-store": "saves the session object in JSON files in the local folder (sessions by default). This is not as advanced as other sessions stores, but great for debugging and learning",
+    "nodemon": "executes on 'nodemon ...', restarts on source file change"
   }
 }

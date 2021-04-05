@@ -25,7 +25,7 @@ app.use('/image', express.static(path.join(__dirname, 'public/images')));
 app.use('/', indexRouter);
 app.use('/prove09', require('./routes/prove09'));
 app.use('/SK', require('./routes/SKRouter'));
-app.use('/SK/sus', require('./private/SpellbookKeeper'));
+//app.use('/SK/sus', require('./private/SpellbookKeeper'));
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
