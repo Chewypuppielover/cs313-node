@@ -8,15 +8,14 @@ const pool = new Pool({connectionString: process.env.DATABASE_URL, ssl:{rejectUn
 pool.connect();
 const bcrypt = require('bcrypt');
 var total;
-pool.query("SELECT spells.name FROM project2.spells spells", (err, res) => {if(err) debug(err); else total = res.rowCount;});
+pool.query("SELECT COUNT(spells.name) FROM project2.spells spells", (err, res) => {if(err) debug(err); else total = res.rows[0][0];});
 
 /* GET home page. , spells.save_id*/
 router.get('/', (req, res, next) => {
-   debug('cookies at main:', JSON.stringify(req.cookies));
+   //debug('cookies at main:', JSON.stringify(req.cookies));
    res.clearCookie('account-error');
-   //res.clearCookie('test1');
    var count = 0;
-   var dropdown = function() { count++; if(count == 5) doRender(); };
+   var dropdown = function() { count++; if(count == 6) doRender(); };
    var schools, saves, lengths, sources, classes;
    function doRender() { res.render('SpellbookKeeper', {'account':req.cookies.account, schools, saves, lengths, sources, classes}); }
    pool.query("SELECT id, name FROM project2.schools", (err, res) => {if(err) debug(err); else schools = res.rows; dropdown();});
@@ -24,8 +23,20 @@ router.get('/', (req, res, next) => {
    pool.query("SELECT id, name FROM project2.classes", (err, res) => {if(err) debug(err); else classes = res.rows; dropdown();});
    pool.query("SELECT id, name FROM project2.lengths", (err, res) => {if(err) debug(err); else lengths = res.rows; dropdown();});
    pool.query("SELECT id, name FROM project2.saves_attacks", (err, res) => {if(err) debug(err); else saves = res.rows; dropdown();});
+   if(req.cookies.account && !req.cookies.account.books) {
+      pool.query("SELECT name, id FROM project2.books WHERE user_id = $1", [req.cookies.account.id], (err, result) => {
+         if(err) debug(err); else {
+            debugDB('books Query returned:');
+            debugDB(result.rows);
+            req.cookies.account['books'] = result.rows;
+            res.cookie('account', req.cookies.account);
+         }
+      dropdown(); });
+   } else dropdown();
 });
+
 router.use('/sus', require('../private/SpellbookKeeper'));
+
 router.post('/signIn', (req, res, next) => {
    //res.cookie('account', {'name': 'Suzy', 'id':2});
    res.clearCookie('account-error');
@@ -71,12 +82,9 @@ router.post('/signUp', (req, res, next) => {
    });
 });
 
-// router.get('/mybooks', (req, res, next) => {res.render('SpellbookKeeper');});
-// router.get('/manage', (req, res, next) => {res.render('SpellbookKeeper');});
-router.get('/updateTotal', (req, res, next) => {total++;});
-router.get('/data', (req, res, next) => {
+router.get('/SpellData', (req, res, next) => {
    debugData("data called");
-   var q = "SELECT spells.name, spells.lvl, sc.name school, so.name source, s.name save_attack, ct.name casting_time_type, spells.casting_time, spells.duration, spells.concentration, spells.ritual, spells.range, spells.range_type, spells.area, spells.components, spells.component_desc, spells.consumed, spells.description, spells.higher_desc FROM project2.spells spells LEFT JOIN project2.schools sc ON spells.school_id = sc.id LEFT JOIN project2.sources so ON spells.source_id = so.id LEFT JOIN project2.lengths ct ON spells.casting_time_id = ct.id LEFT OUTER JOIN project2.saves_attacks s ON spells.save_id = s.id WHERE (spells.user_id = 1";
+   var q = "SELECT spells.name, spells.id, spells.lvl, sc.name school, so.name source, s.name save_attack, ct.name casting_time_type, spells.casting_time, spells.duration, spells.concentration, spells.ritual, spells.range, spells.range_type, spells.area, spells.components, spells.component_desc, spells.consumed, spells.description, spells.higher_desc FROM project2.spells spells LEFT JOIN project2.schools sc ON spells.school_id = sc.id LEFT JOIN project2.sources so ON spells.source_id = so.id LEFT JOIN project2.lengths ct ON spells.casting_time_id = ct.id LEFT OUTER JOIN project2.saves_attacks s ON spells.save_id = s.id WHERE (spells.user_id = 1";
    if(req.cookies.account) q += " OR spells.user_id = " + req.cookies.account.id + ')'; else q+=')';
    //q += ' OR spells.user_id = 2)';
    if(req.query.search) q += " AND spells.name ILIKE '%"+req.query.search+"%'";
@@ -141,11 +149,11 @@ router.use('/newSpell', (req, res, next) => {
       req.body['range'], req.body['range_type'], comp, req.body['com_desc'],
       Boolean(req.body['consumed']), req.body['description'], req.body['higher_desc'],
       req.body['area']];
-   if(req.cookies.account) ins[17] = req.cookies.account.id; else ins[17] = 2;
+   if(req.cookies.account) ins.push(req.cookies.account.id); else ins.push(2);
    //debug(ins);
    if(req.body.save) {
       //debug(insertSave); 
-      ins[18] = req.body['save'];
+      ins.push(req.body['save']);
       pool.query(insertSave, ins, (err, result) => {
          if(err) { debug("query Error: "); debug(err); }
          else { res.write("Spell added successfully"); total++; }
@@ -158,6 +166,78 @@ router.use('/newSpell', (req, res, next) => {
          else { res.end("Spell added successfully"); total++; }
          //debug(result);
       });
+   }
+});
+
+router.get('/BookData', (req, res, next) => {
+   pool.query("SELECT r.spell_id FROM project2.spellbook_relation r " +
+         "LEFT JOIN project2.books b ON r.book_id = b.id " +
+         "WHERE b.id = $1", [req.query.id], (err, result) => {
+      if(err) debugDB(err); else {
+         if(result.rowCount) {
+            var list = [];
+            result.rows.forEach(function(value, key) {
+               debug(value.spell_id);
+               list.push(value.spell_id);
+            });
+            q = "SELECT spells.name, spells.id, spells.lvl, sc.name school, so.name source, s.name save_attack, ct.name casting_time_type, spells.casting_time, spells.duration, spells.concentration, spells.ritual, spells.range, spells.range_type, spells.area, spells.components, spells.component_desc, spells.consumed, spells.description, spells.higher_desc FROM project2.spells spells LEFT JOIN project2.schools sc ON spells.school_id = sc.id LEFT JOIN project2.sources so ON spells.source_id = so.id LEFT JOIN project2.lengths ct ON spells.casting_time_id = ct.id LEFT OUTER JOIN project2.saves_attacks s ON spells.save_id = s.id WHERE spells.id IN (" + list + ")";
+            if(req.query.search) q += " AND spells.name ILIKE '%"+req.query.search+"%'";
+            q += " ORDER BY " 
+            if(req.query.sort) q += req.query.sort + " " + req.query.order + ', ';
+            q += 'name';
+            debugDB(q);
+            pool.query(q, (err, result) => {if(err) debugDB(err); else { //debugDB(result);
+               var end = Number(req.query.offset) + Number(req.query.limit);
+               res.json({"total": result.rowCount,
+                     "totalNotFiltered": result.rowCount,
+                     "rows": result.rows.slice(req.query.offset, end)});
+            } });
+         } else res.json();
+      }
+   });
+});
+router.get('/newBook', (req, res, next) => {
+   debug(req.query.name, req.cookies.account.id);
+   pool.query("INSERT INTO project2.books (name, user_id) VALUES ($1, $2) RETURNING id", [req.query.name, req.cookies.account.id],
+   (err, result) => {if(err) debug(err); else {
+      debugDB(result);
+      var book = {name:req.query.name, id:result.rows[0].id};
+      req.cookies.account.books.push(book) ;
+      res.cookie('account', req.cookies.account);
+      res.redirect('/sk');
+   }});
+});
+router.get('/removeBook', (req, res, next) => {
+   debug(req.query.book_id, req.cookies.account.id);
+   pool.query("DELETE FROM project2.books WHERE id = $1", [req.query.book_id],
+   (err, result) => {if(err) debug(err); else {
+      debugDB(result);
+      debug(req.cookies.account.books);
+      req.cookies.account.books.forEach(function(val, key) {
+         if(val.id == req.query.book_id) req.cookies.account.books.splice(key, 1);
+      });
+      debug(req.cookies.account.books);
+      res.cookie('account', req.cookies.account);
+      res.redirect('/sk');
+   }});
+});
+
+router.get('/ToBook', (req, res, next) => {
+   if(req.query.funct == 'add') {
+      var q = "INSERT INTO project2.spellbook_relation (book_id, spell_id) VALUES";
+      var ins = [req.query.book_id];
+      req.query.spell_id.split(',').forEach(function(x, k) {
+         ins.push(x);
+         q += " ($1, $"+(k+2)+"),"
+      });
+      debugDB(q.slice(0, -1));
+      pool.query(q.slice(0, -1), ins,
+      (err, result) => { if(err) debugDB(err); else res.json(req.query.book_id); });
+   }
+   if(req.query.funct == 'remove') {
+      var q = "DELETE FROM project2.spellbook_relation WHERE book_id = "+req.query.book_id+" AND spell_id IN ("+req.query.spell_id+')';
+      debugDB(q);
+      pool.query(q, (err, result) => { if(err) debugDB(err); else res.json(true); });
    }
 });
 

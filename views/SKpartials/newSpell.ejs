@@ -19,7 +19,24 @@
       }
    }
 %>
-<form method='POST' action='/sk/newSpell'>
+<script>
+   $('#newSpell').on( "submit", function( event ) {
+      event.preventDefault();
+      $.ajax({
+         url: $(this).prop('action'),
+         data: $(this).serialize(),
+         type: $(this).prop('method')
+      }).done(function(res) {
+         if(res) $( '#success' ).html( res );
+         else {
+            console.log('error');
+            console.log(document.cookie);
+         }
+      });
+   })
+</script>
+<div id='success'></div>
+<form id=newSpell method='POST' action='/sk/newSpell'>
    <fieldset>
       <h2>Create New Spell</h2>
       <label>Spell Name: <input type='text' name='name' required></input></label></br>

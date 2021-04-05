@@ -29,7 +29,7 @@
    <button id='manage' class='nav-link' onclick="a('#Manage')">Manage</button>
    
    <div id='account' class='dropdown'>
-      <button class='btn-primary dropdown-toggle' data-bs-toggle="dropdown"><span class="caret"><%=print%></span></button>
+      <button class='btn-primary dropdown-toggle' data-bs-toggle="dropdown"><%=print%><span class="caret"></span></button>
       <div class="dropdown-menu">
          <% if(locals.account) {%>
          <a class='dropdown-item' href="/sk/signOut">Sign Out</a>

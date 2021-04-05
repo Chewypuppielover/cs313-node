@@ -1,0 +1,61 @@
+<%# account{name, id, books[{name, id}]} %>
+<style>
+   .collapsible {
+     background-color: #777;
+     color: white;
+     cursor: pointer;
+     padding: 18px;
+     width: 100%;
+     border: none;
+     text-align: left;
+     outline: none;
+     font-size: 15px;
+   }
+   .active, .collapsible:hover {
+     background-color: #555;
+   }
+   .content {
+     padding: 0 18px;
+     display: none;
+     overflow: hidden;
+     background-color: #f1f1f1;
+   }
+</style>
+
+<% account.books.forEach(function (value) { %>
+   <button type="button" class="collapsible"><%=value.name%></button> <!-- todo: get name instead -->
+   <div class='content'>
+      <a href="/sk/removeBook?book_id=<%=value.id%>" class="btn btn-danger">
+         <i class="fa fa-trash"></i> Delete Book
+      </a>
+      <div id='tlb<%=value.id%>'>
+         <button id="remove" class="btn btn-danger" disabled>
+            <i class="fa fa-minus"></i> Remove
+         </button>
+      </div>
+      <table
+         id="Book<%=value.id%>"
+         data-toolbar="#tlb<%=value.id%>"     
+         data-search="true"
+         data-show-columns="true"
+         data-show-columns-toggle-all="true"
+         data-detail-view="true"
+         data-detail-view-by-click="true"
+         data-detail-formatter="detailFormatter"
+         data-minimum-count-columns="2"
+         data-pagination="true"
+         data-id-field="id"
+         data-page-list="[5, 10, 25, 50, 100, all]"
+         data-show-footer="true"
+         data-side-pagination="server"
+         data-url="/sk/bookdata?id=<%=value.id%>"
+         data-response-handler="responseHandler">
+      </table>
+   </div>
+<%})%>
+
+<button class=collapsible> Creat New SpellBook</button>
+<form action='/sk/newBook' class=content>
+   <label>Name your book: <input name=name required></label>
+   <input type=submit value='Create Book'>
+</form>
