@@ -19,23 +19,6 @@
       }
    }
 %>
-<script>
-   $('#newSpell').on( "submit", function( event ) {
-      event.preventDefault();
-      $.ajax({
-         url: $(this).prop('action'),
-         data: $(this).serialize(),
-         type: $(this).prop('method')
-      }).done(function(res) {
-         if(res) $( '#success' ).html( res );
-         else {
-            console.log('error');
-            console.log(document.cookie);
-         }
-      });
-   })
-</script>
-<div id='success'></div>
 <form id=newSpell method='POST' action='/sk/newSpell'>
    <fieldset>
       <h2>Create New Spell</h2>
@@ -60,15 +43,15 @@
       </select></label>
    </fieldset>
    <fieldset> 
-      <label>Casting Time: <input type='number' name='casting_time' required></input></label>
+      <label>Casting Time: <input type='number' name='casting_time' min=0 required></input></label>
       <label>Action: <select name='cast_id'>
          <% lengths.forEach( (row) => { %>
             <option value="<%=row.id%>"><%= ucwords(row.name) %></option>
          <% }) %>
       </select></label></br>
       
-      <label>Range: <input type='number' name='range'></input></label>
-      <label><input type='text' name='range_type'></input></label></br>
+      <label>Range: <input type='number' name='range' min=0 required></input></label>
+      <label><input type='text' name='range_type' required></input></label></br>
       
       <label>Duration: <input type='text' name='duration' required></input></label>
       
@@ -104,4 +87,29 @@
       <% }) %>
    </fieldset>
       <input type='submit' value='Create Spell'/>
+      <div id='success' class='alert-warning'></div>
 </form>
+
+<script>
+   $('#newSpell').on( "submit", function( event ) {
+      event.preventDefault();
+      if($("input[name='components[]']:checked").length){
+         $("input[name='components[]']")[0].setCustomValidity('');
+         $.ajax({
+            url: $(this).prop('action'),
+            data: $(this).serialize(),
+            type: $(this).prop('method')
+         }).done(function(res) {
+            if(res) $( '#success' ).html( res );
+            else {
+               console.log('error');
+               console.log(document.cookie);
+            }
+         });
+      } else $("input[name='components[]']")[0].setCustomValidity('Please Select a Component');
+   });
+   
+   $("input[name='components[]']").each(function() {
+      $(this).change(function(){ console.log('clicked'); $("input[name='components[]']")[0].setCustomValidity(''); });
+   });
+</script>

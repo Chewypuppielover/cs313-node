@@ -156,14 +156,21 @@ router.use('/newSpell', (req, res, next) => {
       ins.push(req.body['save']);
       pool.query(insertSave, ins, (err, result) => {
          if(err) { debug("query Error: "); debug(err); }
-         else { res.write("Spell added successfully"); total++; }
+         else { res.json("Spell added successfully"); total++; }
          //debug(result);
       });
    } else {
       //debug(insert);
       pool.query(insert, ins, (err, result) => {
-         if(err) { debug("query Error: "); debug(err); }
-         else { res.end("Spell added successfully"); total++; }
+         if(err) { 
+            debug("query Error: ");
+            debugDB(err);
+            debug(Object.keys(err));
+            debug(err.code);
+            if(err.code == 23505) res.json("Spell name taken");
+            else res.json("there was an issue");
+         }
+         else { res.json("Spell added successfully"); total++; }
          //debug(result);
       });
    }
